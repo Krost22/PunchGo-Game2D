@@ -44,8 +44,8 @@ public class PunchHand : MonoBehaviour
                     knockbackDir = Vector2.up;
                 }
 
-                // Infligir daño y pasar la dirección del empuje
-                enemy.TakeDamage(playerCombat.punchDamage, knockbackDir);
+                // Infligir daño y pasar la dirección del empuje con fuerza personalizada
+                enemy.TakeDamage(playerCombat.CurrentDamage, knockbackDir, playerCombat.CurrentKnockbackForce);
             }
         }
     }

@@ -64,9 +64,12 @@ public class Enemy : MonoBehaviour
         rb.MovePosition(new Vector2(newX, newY));
     }
 
-    public void TakeDamage(float damage, Vector2 knockbackDirection)
+    public void TakeDamage(float damage, Vector2 knockbackDirection, float customKnockbackForce = -1f)
     {
         currentHealth -= damage;
+
+        // Trigger global hit event
+        GameEvents.TriggerEnemyHit(this, damage);
 
         // 1. Activar feedbacks de golpe
         if (hitFeedback != null)
@@ -77,7 +80,8 @@ public class Enemy : MonoBehaviour
         // 2. Aplicar retroceso físico (Knockback)
         if (gameObject.activeInHierarchy)
         {
-            StartCoroutine(KnockbackRoutine(knockbackDirection));
+            float force = customKnockbackForce >= 0f ? customKnockbackForce : knockbackForce;
+            StartCoroutine(KnockbackRoutine(knockbackDirection, force));
         }
 
         // 3. Evaluar muerte
@@ -85,12 +89,12 @@ public class Enemy : MonoBehaviour
             Die();
     }
 
-    IEnumerator KnockbackRoutine(Vector2 direction)
+    IEnumerator KnockbackRoutine(Vector2 direction, float force)
     {
         isKnockedBack = true;
         
         // Aplicamos un impulso de velocidad en la dirección del golpe
-        rb.linearVelocity = direction * knockbackForce;
+        rb.linearVelocity = direction * force;
 
         yield return new WaitForSeconds(knockbackDuration);
 
@@ -105,6 +109,9 @@ public class Enemy : MonoBehaviour
 
     private void Die()
     {
+        // Trigger global death event
+        GameEvents.TriggerEnemyKilled(this);
+
         if (deathFeedback != null)
         {
             // Reproducir feedback de muerte (ej: explosión de partículas)
